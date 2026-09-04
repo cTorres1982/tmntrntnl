@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Modules\Jobs\JobTracker.Modules.Jobs.Domain\JobTracker.Modules.Jobs.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Jobs\JobTracker.Modules.Jobs.Application\JobTracker.Modules.Jobs.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Jobs\JobTracker.Modules.Jobs.Infrastructure\JobTracker.Modules.Jobs.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Jobs\JobTracker.Modules.Jobs.IntegrationEvents\JobTracker.Modules.Jobs.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Billing\JobTracker.Modules.Billing.Domain\JobTracker.Modules.Billing.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Billing\JobTracker.Modules.Billing.Application\JobTracker.Modules.Billing.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Billing\JobTracker.Modules.Billing.Infrastructure\JobTracker.Modules.Billing.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Billing\JobTracker.Modules.Billing.IntegrationEvents\JobTracker.Modules.Billing.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\src\Api\JobTracker.Api\JobTracker.Api.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\JobTracker.Modules.Billing.Application\JobTracker.Modules.Billing.Application.csproj" />
+    <ProjectReference Include="..\JobTracker.Modules.Billing.Domain\JobTracker.Modules.Billing.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\JobTracker.SharedKernel\JobTracker.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
