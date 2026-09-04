@@ -1,0 +1,29 @@
+# Backend (.NET) and frontend (Next.js) each have their own .gitignore
+# in backend/ and frontend/. This one covers everything at the repo root
+# and cross-cutting OS/editor/tooling noise.
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Env files that might land at repo root (docker-compose, etc.)
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+
+# Local Postgres dumps/backups, if any get created during manual testing
+*.sql.bak
