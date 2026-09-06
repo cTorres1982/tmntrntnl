@@ -12,6 +12,12 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         builder.HasKey(message => message.Id);
         builder.Property(message => message.Type).IsRequired().HasMaxLength(500);
         builder.Property(message => message.Content).IsRequired().HasColumnType("jsonb");
-        builder.HasIndex(message => message.ProcessedOnUtc);
+
+        // The dispatcher's poll query is always "WHERE processed_on_utc IS NULL" —
+        // a partial index only covers the rows that query needs, so it stays small
+        // even as processed messages accumulate over time.
+        builder.HasIndex(message => message.OccurredOnUtc)
+            .HasDatabaseName("ix_outbox_messages_unprocessed")
+            .HasFilter("processed_on_utc IS NULL");
     }
 }
