@@ -12,9 +12,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.102.8",
     "next": "15.5.25",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "server-only": "^0.0.1",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -26,6 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.25",
     "jsdom": "^30.0.1",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.0"

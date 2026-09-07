@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Hangfire;
 using Hangfire.PostgreSql;
 using JobTracker.Api.Endpoints.Jobs;
@@ -10,6 +11,15 @@ using JobTracker.Modules.Jobs.Infrastructure.Outbox;
 using JobTracker.SharedKernel.Multitenancy;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// System.Text.Json serializes enums as their underlying int by default —
+// independent of EF Core's HasConversion<string>(), which only governs
+// database storage. Without this, JobResponse.Status (and every other enum
+// in an API response) would go over the wire as a number, breaking every
+// frontend consumer that expects the string literal (e.g. "Draft") the
+// domain and database both already use.
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 string connectionString = builder.Configuration.GetConnectionString("Postgres")
     ?? Environment.GetEnvironmentVariable("JOBTRACKER_CONNECTION_STRING")
