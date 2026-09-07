@@ -1,8 +1,8 @@
 using EFCore.NamingConventions;
+using JobTracker.Modules.Billing.Application.Abstractions;
 using JobTracker.Modules.Billing.Domain;
 using JobTracker.Modules.Billing.Infrastructure.Persistence;
 using JobTracker.Modules.Billing.Infrastructure.Persistence.Repositories;
-using JobTracker.SharedKernel.Application;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

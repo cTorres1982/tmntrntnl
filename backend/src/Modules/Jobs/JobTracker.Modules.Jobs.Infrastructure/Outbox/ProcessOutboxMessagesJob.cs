@@ -3,6 +3,7 @@ using JobTracker.Modules.Jobs.Domain.Events;
 using JobTracker.Modules.Jobs.Infrastructure.Persistence;
 using JobTracker.Modules.Jobs.IntegrationEvents;
 using JobTracker.SharedKernel.Domain;
+using JobTracker.SharedKernel.Multitenancy;
 using JobTracker.SharedKernel.Outbox;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,12 +32,18 @@ public sealed class ProcessOutboxMessagesJob
 
     private readonly JobsDbContext _dbContext;
     private readonly IPublisher _publisher;
+    private readonly CurrentOrganizationProvider _currentOrganizationProvider;
     private readonly ILogger<ProcessOutboxMessagesJob> _logger;
 
-    public ProcessOutboxMessagesJob(JobsDbContext dbContext, IPublisher publisher, ILogger<ProcessOutboxMessagesJob> logger)
+    public ProcessOutboxMessagesJob(
+        JobsDbContext dbContext,
+        IPublisher publisher,
+        CurrentOrganizationProvider currentOrganizationProvider,
+        ILogger<ProcessOutboxMessagesJob> logger)
     {
         _dbContext = dbContext;
         _publisher = publisher;
+        _currentOrganizationProvider = currentOrganizationProvider;
         _logger = logger;
     }
 
@@ -89,6 +96,13 @@ public sealed class ProcessOutboxMessagesJob
 
     private async Task DispatchAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
+        // A background job has no HTTP request/header to derive the tenant from —
+        // every domain event already carries its own OrganizationId, so use that to
+        // set the ambient tenant for the DbContext's global query filter (see
+        // JobsDbContext/BillingDbContext.OnModelCreating) for the duration of
+        // processing this one message.
+        _currentOrganizationProvider.OrganizationId = domainEvent.OrganizationId;
+
         if (domainEvent is JobCompletedDomainEvent jobCompleted)
         {
             var integrationEvent = new JobCompletedIntegrationEvent(

@@ -1,5 +1,5 @@
+using JobTracker.Modules.Jobs.Application.Abstractions;
 using JobTracker.Modules.Jobs.Domain;
-using JobTracker.SharedKernel.Application;
 using JobTracker.SharedKernel.Results;
 using MediatR;
 

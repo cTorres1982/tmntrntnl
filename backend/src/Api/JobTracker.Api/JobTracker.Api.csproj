@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Jobs\JobTracker.Modules.Jobs.Infrastructure\JobTracker.Modules.Jobs.Infrastructure.csproj" />
@@ -10,10 +10,17 @@
     <ProjectReference Include="..\..\Shared\JobTracker.SharedKernel\JobTracker.SharedKernel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2b62d78a-f1ed-4ba2-ae7d-9b4aa0536ba2</UserSecretsId>
   </PropertyGroup>
 
 </Project>

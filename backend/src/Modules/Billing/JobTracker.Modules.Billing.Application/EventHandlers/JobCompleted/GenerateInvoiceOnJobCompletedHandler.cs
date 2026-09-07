@@ -1,6 +1,6 @@
+using JobTracker.Modules.Billing.Application.Abstractions;
 using JobTracker.Modules.Billing.Domain;
 using JobTracker.Modules.Jobs.IntegrationEvents;
-using JobTracker.SharedKernel.Application;
 using MediatR;
 
 namespace JobTracker.Modules.Billing.Application.EventHandlers.JobCompleted;

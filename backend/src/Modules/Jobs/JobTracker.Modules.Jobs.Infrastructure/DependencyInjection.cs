@@ -5,7 +5,6 @@ using JobTracker.Modules.Jobs.Infrastructure.Notifications;
 using JobTracker.Modules.Jobs.Infrastructure.Outbox;
 using JobTracker.Modules.Jobs.Infrastructure.Persistence;
 using JobTracker.Modules.Jobs.Infrastructure.Persistence.Repositories;
-using JobTracker.SharedKernel.Application;
 using JobTracker.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

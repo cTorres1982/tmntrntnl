@@ -1,6 +1,6 @@
 using JobTracker.Modules.Jobs.Application.Abstractions;
 using JobTracker.Modules.Jobs.Domain;
-using JobTracker.SharedKernel.Application;
+using JobTracker.SharedKernel.Multitenancy;
 using JobTracker.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,9 +13,12 @@ namespace JobTracker.Modules.Jobs.Infrastructure.Persistence;
 /// </summary>
 public sealed class JobsDbContext : DbContext, IJobsDbContext, IUnitOfWork
 {
-    public JobsDbContext(DbContextOptions<JobsDbContext> options)
+    private readonly ICurrentOrganizationProvider _currentOrganizationProvider;
+
+    public JobsDbContext(DbContextOptions<JobsDbContext> options, ICurrentOrganizationProvider currentOrganizationProvider)
         : base(options)
     {
+        _currentOrganizationProvider = currentOrganizationProvider;
     }
 
     public DbSet<Job> Jobs => Set<Job>();
@@ -28,5 +31,11 @@ public sealed class JobsDbContext : DbContext, IJobsDbContext, IUnitOfWork
     {
         modelBuilder.HasDefaultSchema("jobs");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(JobsDbContext).Assembly);
+
+        // Defense-in-depth: every command/query already takes OrganizationId
+        // explicitly (see IJobRepository, SearchJobsQuery), but this global filter
+        // means a handler that forgets to apply it still can't leak another
+        // tenant's rows.
+        modelBuilder.Entity<Job>().HasQueryFilter(job => job.OrganizationId == _currentOrganizationProvider.OrganizationId);
     }
 }
