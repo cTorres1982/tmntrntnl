@@ -19,4 +19,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Handlers/validators are internal sealed per AC.md's naming conventions —
+         this lets the test project exercise them directly via Moq instead of only
+         through the public MediatR pipeline. -->
+    <InternalsVisibleTo Include="JobTracker.Modules.Jobs.Application.Tests" />
+  </ItemGroup>
+
 </Project>
