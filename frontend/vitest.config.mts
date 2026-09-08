@@ -1,6 +1,14 @@
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      // Mirrors tsconfig.json's "@/*" path mapping — Vite/Vitest don't read
+      // tsconfig paths on their own.
+      "@": path.resolve(import.meta.dirname, "."),
+    },
+  },
   test: {
     environment: "jsdom",
     globals: false,

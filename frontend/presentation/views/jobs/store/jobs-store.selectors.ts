@@ -29,7 +29,16 @@ function selectFilteredJobs(state: JobsStoreState): JobListItem[] {
 // component reading only `filters` (say) doesn't re-render when `jobs`
 // changes — the point of "uses selectors" in AC.md 2.2.2.
 export const useJobs = () => useJobsStore((state) => state.jobs);
-export const useFilteredJobs = () => useJobsStore(selectFilteredJobs);
+// useShallow, not a plain selector: when sortConfig is set, selectFilteredJobs
+// returns a *new* array every call (`[...jobs].sort()`) even when nothing
+// actually changed. useSyncExternalStore (which Zustand's hook uses
+// internally) requires a referentially stable snapshot when the underlying
+// state hasn't changed — without useShallow this triggers "Maximum update
+// depth exceeded" (an infinite render loop), since sorting the same elements
+// in the same order still returns a different array reference. useShallow
+// compares the array's elements instead of its identity, so an unchanged sort
+// result keeps returning the previous reference.
+export const useFilteredJobs = () => useJobsStore(useShallow(selectFilteredJobs));
 export const useSelectedJobIds = () => useJobsStore((state) => state.selectedJobIds);
 export const useJobFilters = () => useJobsStore((state) => state.filters);
 export const useJobsPagination = () => useJobsStore((state) => state.pagination);
