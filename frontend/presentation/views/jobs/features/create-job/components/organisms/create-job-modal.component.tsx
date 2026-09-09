@@ -107,6 +107,7 @@ export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps
           field="customerId"
           value={fields.customerId}
           onFieldChange={onFieldChange}
+          error={fieldErrors.customerId}
           required
         />
         <FormField
@@ -121,6 +122,7 @@ export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps
           field="assigneeId"
           value={fields.assigneeId}
           onFieldChange={onFieldChange}
+          error={fieldErrors.assigneeId}
         />
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}

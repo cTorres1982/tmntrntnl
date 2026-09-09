@@ -8,15 +8,17 @@ vi.mock("@/app/jobs/actions", () => ({
 }));
 
 const createJobActionMock = vi.mocked(createJobAction);
+const VALID_CUSTOMER_ID = "11111111-1111-1111-1111-111111111111";
 
 function submitEvent() {
   return { preventDefault: vi.fn() } as unknown as React.FormEvent<HTMLFormElement>;
 }
 
-/** Latitude/longitude are validated before submit — most tests aren't about that validation, so this fills in values that pass it. */
-function fillValidCoordinates(result: { current: ReturnType<typeof useCreateJob> }) {
+/** Latitude/longitude/customerId are all validated before submit — most tests aren't about that validation, so this fills in values that pass it. */
+function fillRequiredValidFields(result: { current: ReturnType<typeof useCreateJob> }) {
   act(() => result.current.onFieldChange("latitude", "30.27"));
   act(() => result.current.onFieldChange("longitude", "-97.74"));
+  act(() => result.current.onFieldChange("customerId", VALID_CUSTOMER_ID));
 }
 
 describe("useCreateJob", () => {
@@ -46,8 +48,7 @@ describe("useCreateJob", () => {
     act(() => result.current.onFieldChange("city", "Austin"));
     act(() => result.current.onFieldChange("state", "TX"));
     act(() => result.current.onFieldChange("zipCode", "78701"));
-    fillValidCoordinates(result);
-    act(() => result.current.onFieldChange("customerId", "cust-1"));
+    fillRequiredValidFields(result);
 
     await act(async () => {
       await result.current.onSubmit(submitEvent());
@@ -58,7 +59,7 @@ describe("useCreateJob", () => {
         title: "Roof repair",
         latitude: 30.27,
         longitude: -97.74,
-        customerId: "cust-1",
+        customerId: VALID_CUSTOMER_ID,
       }),
     );
     expect(onCreated).toHaveBeenCalledOnce();
@@ -69,7 +70,7 @@ describe("useCreateJob", () => {
     const { result } = renderHook(() => useCreateJob(vi.fn()));
 
     act(() => result.current.onFieldChange("title", "Roof repair"));
-    fillValidCoordinates(result);
+    fillRequiredValidFields(result);
     await act(async () => {
       await result.current.onSubmit(submitEvent());
     });
@@ -84,7 +85,7 @@ describe("useCreateJob", () => {
     const { result } = renderHook(() => useCreateJob(onCreated));
 
     act(() => result.current.onFieldChange("title", "Roof repair"));
-    fillValidCoordinates(result);
+    fillRequiredValidFields(result);
     await act(async () => {
       await result.current.onSubmit(submitEvent());
     });
@@ -103,7 +104,7 @@ describe("useCreateJob", () => {
       }),
     );
     const { result } = renderHook(() => useCreateJob(vi.fn()));
-    fillValidCoordinates(result);
+    fillRequiredValidFields(result);
 
     let submitPromise!: Promise<void>;
     act(() => {
@@ -133,6 +134,7 @@ describe("useCreateJob", () => {
 
     act(() => result.current.onFieldChange("latitude", "30.27"));
     act(() => result.current.onFieldChange("longitude", "200"));
+    act(() => result.current.onFieldChange("customerId", VALID_CUSTOMER_ID));
 
     await act(async () => {
       await result.current.onSubmit(submitEvent());
@@ -150,5 +152,42 @@ describe("useCreateJob", () => {
 
     act(() => result.current.onFieldChange("latitude", "30.27"));
     expect(result.current.fieldErrors.latitude).toBeUndefined();
+  });
+
+  test("a customerId that isn't a GUID is rejected, both inline and at submit", async () => {
+    const { result } = renderHook(() => useCreateJob(vi.fn()));
+
+    act(() => result.current.onFieldChange("customerId", "cust-1"));
+    expect(result.current.fieldErrors.customerId).toMatch(/valid GUID/);
+
+    act(() => result.current.onFieldChange("latitude", "30.27"));
+    act(() => result.current.onFieldChange("longitude", "-97.74"));
+
+    await act(async () => {
+      await result.current.onSubmit(submitEvent());
+    });
+
+    expect(createJobActionMock).not.toHaveBeenCalled();
+  });
+
+  test("an empty customerId is rejected as required", () => {
+    const { result } = renderHook(() => useCreateJob(vi.fn()));
+
+    act(() => result.current.onFieldChange("customerId", "not-empty"));
+    act(() => result.current.onFieldChange("customerId", ""));
+
+    expect(result.current.fieldErrors.customerId).toMatch(/required/);
+  });
+
+  test("assigneeId is optional — empty is fine, but a non-empty value must still be a GUID", () => {
+    const { result } = renderHook(() => useCreateJob(vi.fn()));
+
+    expect(result.current.fieldErrors.assigneeId).toBeUndefined();
+
+    act(() => result.current.onFieldChange("assigneeId", "not-a-guid"));
+    expect(result.current.fieldErrors.assigneeId).toMatch(/valid GUID/);
+
+    act(() => result.current.onFieldChange("assigneeId", ""));
+    expect(result.current.fieldErrors.assigneeId).toBeUndefined();
   });
 });
