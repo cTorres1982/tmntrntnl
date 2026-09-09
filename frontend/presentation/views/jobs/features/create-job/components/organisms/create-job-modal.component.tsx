@@ -18,6 +18,7 @@ interface FormFieldProps {
   required?: boolean;
   min?: number;
   max?: number;
+  step?: string;
   error?: string;
 }
 
@@ -27,7 +28,18 @@ interface FormFieldProps {
  * and every keystroke is reported back via onChange, rather than the input
  * managing an uncontrolled DOM value.
  */
-function FormField({ label, field, value, onFieldChange, type = "text", required, min, max, error }: FormFieldProps) {
+function FormField({
+  label,
+  field,
+  value,
+  onFieldChange,
+  type = "text",
+  required,
+  min,
+  max,
+  step,
+  error,
+}: FormFieldProps) {
   return (
     <label className="flex flex-col gap-1 text-sm">
       <span className="font-medium text-gray-700">{label}</span>
@@ -38,6 +50,7 @@ function FormField({ label, field, value, onFieldChange, type = "text", required
         required={required}
         min={min}
         max={max}
+        step={step}
         aria-invalid={error ? true : undefined}
         onChange={(event) => onFieldChange(field, event.target.value)}
       />
@@ -86,6 +99,7 @@ export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps
           type="number"
           min={-90}
           max={90}
+          step="any"
           value={fields.latitude}
           onFieldChange={onFieldChange}
           error={fieldErrors.latitude}
@@ -97,6 +111,7 @@ export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps
           type="number"
           min={-180}
           max={180}
+          step="any"
           value={fields.longitude}
           onFieldChange={onFieldChange}
           error={fieldErrors.longitude}
