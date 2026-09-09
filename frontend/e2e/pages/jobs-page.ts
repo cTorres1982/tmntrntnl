@@ -39,7 +39,9 @@ export class JobsPage {
     await modal.getByLabel("Zip code").fill(data.zipCode);
     await modal.getByLabel("Latitude").fill(data.latitude);
     await modal.getByLabel("Longitude").fill(data.longitude);
-    await modal.getByLabel("Customer ID").fill(data.customerId);
+    // Customer is a <select> of real customers (a picker, not a free-text
+    // GUID field — see CustomerSelect) — select by the id global-setup seeded.
+    await modal.getByLabel("Customer").selectOption(data.customerId);
   }
 
   async submitCreateJobForm(): Promise<void> {

@@ -1,5 +1,6 @@
 using JobTracker.Modules.Jobs.Application.Abstractions;
 using JobTracker.Modules.Jobs.Domain;
+using JobTracker.Modules.Jobs.Infrastructure.Persistence.Placeholders;
 using JobTracker.SharedKernel.Multitenancy;
 using JobTracker.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,15 @@ public sealed class JobsDbContext : DbContext, IJobsDbContext, IUnitOfWork
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
+    /// <summary>
+    /// Exposed only for the /customers lookup endpoint (a picker so the
+    /// create-job form never lets someone type an unknown GUID) — Customer has
+    /// no Application-layer port because it isn't a real domain concept, so
+    /// the endpoint reads this DbSet directly instead of going through a
+    /// CQRS query that would overstate its importance.
+    /// </summary>
+    public DbSet<Customer> Customers => Set<Customer>();
+
     IQueryable<Job> IJobsDbContext.Jobs => Jobs;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,5 +47,6 @@ public sealed class JobsDbContext : DbContext, IJobsDbContext, IUnitOfWork
         // means a handler that forgets to apply it still can't leak another
         // tenant's rows.
         modelBuilder.Entity<Job>().HasQueryFilter(job => job.OrganizationId == _currentOrganizationProvider.OrganizationId);
+        modelBuilder.Entity<Customer>().HasQueryFilter(customer => customer.OrganizationId == _currentOrganizationProvider.OrganizationId);
     }
 }

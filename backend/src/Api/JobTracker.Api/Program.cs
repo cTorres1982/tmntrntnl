@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Hangfire;
 using Hangfire.PostgreSql;
+using JobTracker.Api.Endpoints.Customers;
 using JobTracker.Api.Endpoints.Jobs;
 using JobTracker.Api.Multitenancy;
 using JobTracker.Modules.Billing.Application;
@@ -54,6 +55,7 @@ WebApplication app = builder.Build();
 app.UseMiddleware<TenantContextMiddleware>();
 
 app.MapJobsEndpoints();
+app.MapCustomersEndpoints();
 
 // Dev-only: no auth on the dashboard. A real deployment would restrict this
 // (Hangfire's DashboardOptions.Authorization) before ever being reachable.

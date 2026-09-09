@@ -2,6 +2,7 @@
 
 import type { CreateJobFormFields } from "../../create-job-form-fields.type";
 import { useCreateJob } from "../../hooks/use-create-job.hook";
+import { useCustomers } from "../../hooks/use-customers.hook";
 
 interface CreateJobModalProps {
   open: boolean;
@@ -63,6 +64,51 @@ function FormField({
   );
 }
 
+interface CustomerSelectProps {
+  value: string;
+  onFieldChange: (field: keyof CreateJobFormFields, value: string) => void;
+  error?: string;
+}
+
+/**
+ * A dropdown of real customers, not a free-text GUID field — the customer id
+ * problem (typing an unknown/invalid id) is solved by construction instead of
+ * by validating harder after the fact. Still a Controlled Component: value
+ * and the change handler both come from the parent.
+ */
+function CustomerSelect({ value, onFieldChange, error }: CustomerSelectProps) {
+  const { customers, isLoading, isError } = useCustomers();
+
+  return (
+    <label className="flex flex-col gap-1 text-sm">
+      <span className="font-medium text-gray-700">Customer</span>
+      <select
+        className={`rounded-md border bg-white px-2 py-1 ${error ? "border-red-500" : "border-gray-300"}`}
+        value={value}
+        required
+        disabled={isLoading || isError}
+        aria-invalid={error ? true : undefined}
+        onChange={(event) => onFieldChange("customerId", event.target.value)}
+      >
+        <option value="" disabled>
+          {isLoading ? "Loading customers…" : "Select a customer"}
+        </option>
+        {customers.map((customer) => (
+          <option key={customer.id} value={customer.id}>
+            {customer.name}
+          </option>
+        ))}
+      </select>
+      {isError ? <span className="text-xs text-red-600">Could not load customers.</span> : null}
+      {error ? (
+        <span className="text-xs text-red-600" data-testid="customerId-error">
+          {error}
+        </span>
+      ) : null}
+    </label>
+  );
+}
+
 /**
  * Thin shell (AC.md 2.1.6): every bit of state and the submit handler live in
  * useCreateJob — this component only wires hook output to JSX.
@@ -117,14 +163,7 @@ export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps
           error={fieldErrors.longitude}
           required
         />
-        <FormField
-          label="Customer ID"
-          field="customerId"
-          value={fields.customerId}
-          onFieldChange={onFieldChange}
-          error={fieldErrors.customerId}
-          required
-        />
+        <CustomerSelect value={fields.customerId} onFieldChange={onFieldChange} error={fieldErrors.customerId} />
         <FormField
           label="Scheduled date (optional)"
           field="scheduledDate"
