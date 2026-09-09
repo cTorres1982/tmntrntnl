@@ -2,9 +2,10 @@
 
 import { useCallback, useReducer } from "react";
 import { createJobAction } from "@/app/jobs/actions";
+import type { CreateJobFormFields } from "../create-job-form-fields.type";
 import { createJobFormReducer } from "../create-job-form.reducer";
 import { INITIAL_CREATE_JOB_FORM_STATE } from "../create-job-form-state.type";
-import type { CreateJobFormFields } from "../create-job-form-fields.type";
+import { validateCreateJobForm } from "../validate-create-job-form";
 
 export function useCreateJob(onCreated: () => void) {
   const [state, dispatch] = useReducer(createJobFormReducer, INITIAL_CREATE_JOB_FORM_STATE);
@@ -16,6 +17,13 @@ export function useCreateJob(onCreated: () => void) {
   const onSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+
+      const errors = validateCreateJobForm(state.fields);
+      if (Object.keys(errors).length > 0) {
+        dispatch({ type: "validation-failed", errors });
+        return;
+      }
+
       dispatch({ type: "submit-started" });
 
       const { fields } = state;
@@ -46,6 +54,7 @@ export function useCreateJob(onCreated: () => void) {
 
   return {
     fields: state.fields,
+    fieldErrors: state.fieldErrors,
     isSubmitting: state.isSubmitting,
     error: state.error,
     onFieldChange,

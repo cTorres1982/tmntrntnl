@@ -16,6 +16,9 @@ interface FormFieldProps {
   onFieldChange: (field: keyof CreateJobFormFields, value: string) => void;
   type?: string;
   required?: boolean;
+  min?: number;
+  max?: number;
+  error?: string;
 }
 
 /**
@@ -24,17 +27,25 @@ interface FormFieldProps {
  * and every keystroke is reported back via onChange, rather than the input
  * managing an uncontrolled DOM value.
  */
-function FormField({ label, field, value, onFieldChange, type = "text", required }: FormFieldProps) {
+function FormField({ label, field, value, onFieldChange, type = "text", required, min, max, error }: FormFieldProps) {
   return (
     <label className="flex flex-col gap-1 text-sm">
       <span className="font-medium text-gray-700">{label}</span>
       <input
-        className="rounded-md border border-gray-300 px-2 py-1"
+        className={`rounded-md border px-2 py-1 ${error ? "border-red-500" : "border-gray-300"}`}
         type={type}
         value={value}
         required={required}
+        min={min}
+        max={max}
+        aria-invalid={error ? true : undefined}
         onChange={(event) => onFieldChange(field, event.target.value)}
       />
+      {error ? (
+        <span className="text-xs text-red-600" data-testid={`${field}-error`}>
+          {error}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -44,7 +55,7 @@ function FormField({ label, field, value, onFieldChange, type = "text", required
  * useCreateJob — this component only wires hook output to JSX.
  */
 export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps) {
-  const { fields, isSubmitting, error, onFieldChange, onSubmit } = useCreateJob(() => {
+  const { fields, fieldErrors, isSubmitting, error, onFieldChange, onSubmit } = useCreateJob(() => {
     onCreated();
     onClose();
   });
@@ -73,16 +84,22 @@ export function CreateJobModal({ open, onClose, onCreated }: CreateJobModalProps
           label="Latitude"
           field="latitude"
           type="number"
+          min={-90}
+          max={90}
           value={fields.latitude}
           onFieldChange={onFieldChange}
+          error={fieldErrors.latitude}
           required
         />
         <FormField
           label="Longitude"
           field="longitude"
           type="number"
+          min={-180}
+          max={180}
           value={fields.longitude}
           onFieldChange={onFieldChange}
+          error={fieldErrors.longitude}
           required
         />
         <FormField
