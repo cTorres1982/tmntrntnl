@@ -114,7 +114,13 @@ public sealed class Job : AggregateRoot
             return Result.Failure(JobErrors.TerminalState);
         }
 
-        if (scheduledDate < utcNow)
+        // Calendar-day comparison, not a precise instant: scheduledDate comes
+        // from a date-only picker (no time-of-day), so "today" or "tomorrow"
+        // is the actual intent. Comparing full timestamps instead breaks near
+        // the UTC day boundary — e.g. picking "tomorrow" while it's still
+        // evening locally but already past midnight UTC would otherwise read
+        // as "in the past", even though the user's calendar day hasn't ended.
+        if (scheduledDate.Date < utcNow.Date)
         {
             return Result.Failure(JobErrors.ScheduledInPast);
         }

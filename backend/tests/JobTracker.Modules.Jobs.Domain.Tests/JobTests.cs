@@ -86,6 +86,24 @@ public class JobTests
     }
 
     [Fact]
+    public void Schedule_ForLaterTheSameCalendarDay_Succeeds()
+    {
+        // scheduledDate comes from a date-only picker (no time-of-day), so
+        // "today" is a valid choice even if its midnight instant is earlier
+        // than the exact current time — comparing full timestamps instead of
+        // just the calendar date would incorrectly reject this (and, near the
+        // UTC day boundary, sometimes reject "tomorrow" too).
+        var job = CreateDraft().Value;
+        var assigneeId = Guid.NewGuid();
+        DateTime laterToday = UtcNow.Date;
+
+        var result = job.Schedule(laterToday, assigneeId, UtcNow);
+
+        result.IsSuccess.Should().BeTrue();
+        job.Status.Should().Be(JobStatus.Scheduled);
+    }
+
+    [Fact]
     public void Start_WhenDraft_ReturnsInvalidTransitionFailure()
     {
         var job = CreateDraft().Value;
