@@ -13,6 +13,12 @@ function submitEvent() {
   return { preventDefault: vi.fn() } as unknown as React.FormEvent<HTMLFormElement>;
 }
 
+/** Latitude/longitude are validated before submit — most tests aren't about that validation, so this fills in values that pass it. */
+function fillValidCoordinates(result: { current: ReturnType<typeof useCreateJob> }) {
+  act(() => result.current.onFieldChange("latitude", "30.27"));
+  act(() => result.current.onFieldChange("longitude", "-97.74"));
+}
+
 describe("useCreateJob", () => {
   beforeEach(() => {
     createJobActionMock.mockReset();
@@ -40,8 +46,7 @@ describe("useCreateJob", () => {
     act(() => result.current.onFieldChange("city", "Austin"));
     act(() => result.current.onFieldChange("state", "TX"));
     act(() => result.current.onFieldChange("zipCode", "78701"));
-    act(() => result.current.onFieldChange("latitude", "30.27"));
-    act(() => result.current.onFieldChange("longitude", "-97.74"));
+    fillValidCoordinates(result);
     act(() => result.current.onFieldChange("customerId", "cust-1"));
 
     await act(async () => {
@@ -64,6 +69,7 @@ describe("useCreateJob", () => {
     const { result } = renderHook(() => useCreateJob(vi.fn()));
 
     act(() => result.current.onFieldChange("title", "Roof repair"));
+    fillValidCoordinates(result);
     await act(async () => {
       await result.current.onSubmit(submitEvent());
     });
@@ -78,6 +84,7 @@ describe("useCreateJob", () => {
     const { result } = renderHook(() => useCreateJob(onCreated));
 
     act(() => result.current.onFieldChange("title", "Roof repair"));
+    fillValidCoordinates(result);
     await act(async () => {
       await result.current.onSubmit(submitEvent());
     });
@@ -96,6 +103,7 @@ describe("useCreateJob", () => {
       }),
     );
     const { result } = renderHook(() => useCreateJob(vi.fn()));
+    fillValidCoordinates(result);
 
     let submitPromise!: Promise<void>;
     act(() => {
@@ -110,5 +118,37 @@ describe("useCreateJob", () => {
     });
 
     expect(result.current.isSubmitting).toBe(false);
+  });
+
+  test("typing an out-of-range latitude sets an inline field error immediately, without waiting for submit", () => {
+    const { result } = renderHook(() => useCreateJob(vi.fn()));
+
+    act(() => result.current.onFieldChange("latitude", "999"));
+
+    expect(result.current.fieldErrors.latitude).toMatch(/between -90 and 90/);
+  });
+
+  test("submitting with an out-of-range longitude is blocked before calling createJobAction", async () => {
+    const { result } = renderHook(() => useCreateJob(vi.fn()));
+
+    act(() => result.current.onFieldChange("latitude", "30.27"));
+    act(() => result.current.onFieldChange("longitude", "200"));
+
+    await act(async () => {
+      await result.current.onSubmit(submitEvent());
+    });
+
+    expect(createJobActionMock).not.toHaveBeenCalled();
+    expect(result.current.fieldErrors.longitude).toMatch(/between -180 and 180/);
+  });
+
+  test("fixing an invalid field clears its error", () => {
+    const { result } = renderHook(() => useCreateJob(vi.fn()));
+
+    act(() => result.current.onFieldChange("latitude", "999"));
+    expect(result.current.fieldErrors.latitude).toBeDefined();
+
+    act(() => result.current.onFieldChange("latitude", "30.27"));
+    expect(result.current.fieldErrors.latitude).toBeUndefined();
   });
 });
