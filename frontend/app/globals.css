@@ -12,12 +12,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/*
+ * No dark-mode variant, on purpose: this is an internal business app (AC.md's
+ * "office staff" tool), not a themed product, and the create-next-app
+ * default's dark-mode override was exactly what made typed text invisible —
+ * `body`'s inherited light-gray text color against modals that force a white
+ * background. One fixed light theme avoids that whole class of bug.
+ */
 
 body {
   background: var(--background);

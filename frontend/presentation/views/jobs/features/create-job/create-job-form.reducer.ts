@@ -1,5 +1,6 @@
 import type { CreateJobFormAction } from "./create-job-form-action.type";
 import { INITIAL_CREATE_JOB_FORM_STATE, type CreateJobFormState } from "./create-job-form-state.type";
+import { validateCreateJobField } from "./validate-create-job-field";
 
 /**
  * useReducer (AC.md 2.3.3) rather than several useState calls: the form's
@@ -10,8 +11,21 @@ import { INITIAL_CREATE_JOB_FORM_STATE, type CreateJobFormState } from "./create
  */
 export function createJobFormReducer(state: CreateJobFormState, action: CreateJobFormAction): CreateJobFormState {
   switch (action.type) {
-    case "field-changed":
-      return { ...state, fields: { ...state.fields, [action.field]: action.value } };
+    case "field-changed": {
+      const fields = { ...state.fields, [action.field]: action.value };
+      const fieldError = validateCreateJobField(action.field, action.value);
+      const fieldErrors = { ...state.fieldErrors };
+
+      if (fieldError) {
+        fieldErrors[action.field] = fieldError;
+      } else {
+        delete fieldErrors[action.field];
+      }
+
+      return { ...state, fields, fieldErrors };
+    }
+    case "validation-failed":
+      return { ...state, fieldErrors: action.errors };
     case "submit-started":
       return { ...state, isSubmitting: true, error: null };
     case "submit-succeeded":
